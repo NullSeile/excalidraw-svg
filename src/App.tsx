@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppState, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import {
     Excalidraw,
     exportToSvg,
     loadFromBlob,
-    loadSceneOrLibraryFromBlob,
     MIME_TYPES,
     THEME,
 } from "@excalidraw/excalidraw";
