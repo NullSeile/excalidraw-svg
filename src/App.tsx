@@ -22,12 +22,13 @@ const framerate = 30;
 const frameDuration = 1000 / framerate;
 function App() {
     const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI>();
-    const [shouldSave, setShouldSave] = useState(true);
     const [renderOnChange, setRenderOnChange] = useState(false);
+
+    let timeLastWrite = Date.now()
 
 
     //Utils
-    let saveSVGToFile = async (elements: readonly Ordered<NonDeletedExcalidrawElement>[], state: AppState, files: BinaryFiles) => {
+    let writeSvgFile = async (elements: readonly Ordered<NonDeletedExcalidrawElement>[], state: AppState, files: BinaryFiles) => {
         console.info("Excalidraw API initialized");
         console.info("Attempting to save file")
         const svg = await exportToSvg({
@@ -43,32 +44,28 @@ function App() {
         const code_status = await invoke<number>("save_svg", { svg: (SVG_DOCUMENT_PREAMBLE + svg.outerHTML) });
         if (code_status != 0) {
             console.warn("Couldn't save SVG to file");
+        } else {
+            timeLastWrite = Date.now();
         }
         return code_status
     };
 
-    let trySaveSVG = () => {
-        if (shouldSave == false) {
-            return
-        }
+    let saveSVG = () => {
         if (!excalidrawAPI) {
             console.warn("Excalidraw API not initialized yet");
             return;
         }
-        setShouldSave(false);
         const elements = excalidrawAPI.getSceneElements();
         const state = excalidrawAPI.getAppState();
         const files = excalidrawAPI.getFiles();
-        saveSVGToFile(elements, state, files).then(() => setShouldSave(true))
+        writeSvgFile(elements, state, files)
     }
+
     let realTimeSaveSVG = (elements: readonly Ordered<NonDeletedExcalidrawElement>[], state: AppState, files: BinaryFiles) => {
-        if (shouldSave == false) {
+        if (Date.now() - timeLastWrite < frameDuration) {
             return
         }
-        setShouldSave(false);
-        saveSVGToFile(elements, state, files).then(() => {
-            setTimeout(() => setShouldSave(true), frameDuration)
-        })
+        writeSvgFile(elements, state, files)
     }
 
     //Initialize
@@ -78,7 +75,7 @@ function App() {
             if (matches.args.autosave?.value) {
                 console.info("Saving to file automatically every 30s")
                 setInterval(() => {
-                    trySaveSVG();
+                    saveSVG();
                 }, 30000);
             } else if (matches.args.rtsave?.value) {
                 console.info("Saving to file in real time")
@@ -113,9 +110,18 @@ function App() {
     }, [excalidrawAPI]);
     useEffect(() => {
         document.addEventListener("keydown", (e) => {
-            if (e.ctrlKey && e.key == "s") {
-                e.preventDefault();
-                trySaveSVG();
+            if (e.ctrlKey) {
+                switch (e.key) {
+                    case "s": {
+                        e.preventDefault();
+                        saveSVG();
+                    }
+                }
+            } else {
+                switch (e.key) {
+                    case "t": {
+                    }
+                }
             }
         })
     }, [])
