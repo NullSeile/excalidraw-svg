@@ -29,7 +29,6 @@ function App() {
 
     //Utils
     let writeSvgFile = async (elements: readonly Ordered<NonDeletedExcalidrawElement>[], state: AppState, files: BinaryFiles) => {
-        console.info("Excalidraw API initialized");
         console.info("Attempting to save file")
         const svg = await exportToSvg({
             elements: elements,
@@ -70,6 +69,10 @@ function App() {
 
     //Initialize
     useEffect(() => {
+        if (!excalidrawAPI) {
+            console.warn("Excalidraw API not initialized yet");
+            return;
+        }
         //Setup saving to file
         getMatches().then(matches => {
             if (matches.args.autosave?.value) {
@@ -84,10 +87,6 @@ function App() {
         })
         // Load file from backend
         invoke<string>('get_initial_svg').then((svgContent) => {
-            if (!excalidrawAPI) {
-                console.warn("Excalidraw API not initialized yet");
-                return;
-            }
             console.info("Loading initial SVG content");
             loadFromBlob(
                 new Blob([svgContent], { type: MIME_TYPES.svg }),
@@ -107,9 +106,8 @@ function App() {
                 excalidrawAPI.resetScene({ resetLoadingState: true });
             });
         });
-    }, [excalidrawAPI]);
-    useEffect(() => {
-        document.addEventListener("keydown", (e) => {
+
+        window.addEventListener("keydown", (e) => {
             if (e.ctrlKey) {
                 switch (e.key) {
                     case "s": {
@@ -124,20 +122,25 @@ function App() {
                 }
             }
         })
-    }, [])
+    }, [excalidrawAPI]);
+
     return (
         <main className="container">
             <Excalidraw
+                // initialData={{
+                //     appState: {
+                //         zenModeEnabled: true,
+                //         gridModeEnabled: true,
+                //     },
+                //     scrollToContent: false
+                // }} BUG: Does nothing
                 handleKeyboardGlobally={true}
-                excalidrawAPI={(api) => setExcalidrawAPI(api)}
-                onChange={renderOnChange ? realTimeSaveSVG : undefined}
-                initialData={{
-                    appState: {
-                        theme: THEME.DARK,
-                        gridModeEnabled: true,
-                    },
+                excalidrawAPI={(api) => {
+                    setExcalidrawAPI(api);
+                    console.debug("api_set")
                 }}
-                theme={THEME.DARK}
+                onChange={renderOnChange ? realTimeSaveSVG : undefined}
+                theme={THEME.LIGHT}
             />
         </main>
     );
