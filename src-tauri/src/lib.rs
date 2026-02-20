@@ -8,9 +8,10 @@ struct State {
 }
 
 #[tauri::command]
-fn save_svg(app_handle: AppHandle, svg: &str) {
+fn save_svg(app_handle: AppHandle, svg: &str) -> u64{
     let state = app_handle.state::<State>();
-    fs::write(&state.svg_file, svg).unwrap();
+    fs::write(&state.svg_file, svg).unwrap(); // TODO: Return status 
+    0
 }
 
 #[tauri::command]
