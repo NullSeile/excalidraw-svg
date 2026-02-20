@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from '@tauri-apps/api/event';
+import { getMatches } from "@tauri-apps/plugin-cli";
 
 import { AppState, BinaryFiles, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import {
@@ -12,11 +14,19 @@ import {
 
 import "@excalidraw/excalidraw/index.css";
 import "./App.css";
-import { getMatches } from "@tauri-apps/plugin-cli";
 import { NonDeletedExcalidrawElement, Ordered } from "@excalidraw/excalidraw/element/types";
+
 const SVG_DOCUMENT_PREAMBLE = `<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 `;
+
+
+listen<void>('window-close-requested', (event) => {
+    // saveSVG();
+    console.info(
+        "WINDOW CLOSE REQUEST"
+    );
+});
 
 const framerate = 30;
 const frameDuration = 1000 / framerate;
@@ -107,7 +117,10 @@ function App() {
             });
         });
 
-        window.addEventListener("keydown", (e) => {
+    }, [excalidrawAPI]);
+
+    useEffect(() => {
+        document.getElementById("main-container")!.addEventListener("keydown", (e) => {
             if (e.ctrlKey) {
                 switch (e.key) {
                     case "s": {
@@ -122,25 +135,20 @@ function App() {
                 }
             }
         })
-    }, [excalidrawAPI]);
+    })
 
     return (
-        <main className="container">
+        <main className="container" id="main-container">
             <Excalidraw
-                // initialData={{
-                //     appState: {
-                //         zenModeEnabled: true,
-                //         gridModeEnabled: true,
-                //     },
-                //     scrollToContent: false
-                // }} BUG: Does nothing
                 handleKeyboardGlobally={true}
                 excalidrawAPI={(api) => {
                     setExcalidrawAPI(api);
                     console.debug("api_set")
                 }}
+                zenModeEnabled={false}
+                gridModeEnabled={true}
                 onChange={renderOnChange ? realTimeSaveSVG : undefined}
-                theme={THEME.LIGHT}
+                theme={THEME.DARK}
             />
         </main>
     );
