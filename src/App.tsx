@@ -58,7 +58,7 @@ function App() {
         const elements = excalidrawAPI.getSceneElements();
         const state = excalidrawAPI.getAppState();
         const files = excalidrawAPI.getFiles();
-        writeSvgFile(elements, state, files);
+        return writeSvgFile(elements, state, files);
     }, [excalidrawAPI, writeSvgFile]);
 
     const realTimeSaveSVG = useCallback((elements: readonly Ordered<NonDeletedExcalidrawElement>[], state: AppState, files: BinaryFiles) => {
@@ -109,8 +109,8 @@ function App() {
                 });
         });
 
-        listen<void>('window-close-requested', () => {
-            saveSVG();
+        listen<void>('window-close-requested', async () => {
+            await saveSVG();
             console.info("WINDOW CLOSE REQUEST");
             invoke<void>("close_app");
         }).then((fn) => { unlisten = fn; });
