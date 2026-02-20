@@ -26,6 +26,11 @@ fn get_initial_svg(app_handle: AppHandle) -> String {
     fs::read_to_string(&state.svg_file).unwrap_or_else(|_| "".to_string())
 }
 
+#[tauri::command]
+fn close_app(app_handle: AppHandle) {
+    app_handle.exit(0);
+}
+
 fn on_window_event(window: &Window, event: &WindowEvent) {
     match event {
         WindowEvent::CloseRequested { api, .. } => {
@@ -44,7 +49,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_cli::init())
-        .invoke_handler(tauri::generate_handler![get_initial_svg, save_svg])
+        .invoke_handler(tauri::generate_handler![
+            get_initial_svg,
+            save_svg,
+            close_app
+        ])
         .on_window_event(on_window_event)
         .setup(|app| {
             let binding = app.cli().matches()?;

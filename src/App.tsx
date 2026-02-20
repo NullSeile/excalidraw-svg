@@ -20,14 +20,6 @@ const SVG_DOCUMENT_PREAMBLE = `<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 `;
 
-
-listen<void>('window-close-requested', (event) => {
-    // saveSVG();
-    console.info(
-        "WINDOW CLOSE REQUEST"
-    );
-});
-
 const framerate = 30;
 const frameDuration = 1000 / framerate;
 function App() {
@@ -61,7 +53,7 @@ function App() {
 
     let saveSVG = () => {
         if (!excalidrawAPI) {
-            console.warn("Excalidraw API not initialized yet");
+            console.warn("SaveSVG: Excalidraw API not initialized yet");
             return;
         }
         const elements = excalidrawAPI.getSceneElements();
@@ -80,7 +72,7 @@ function App() {
     //Initialize
     useEffect(() => {
         if (!excalidrawAPI) {
-            console.warn("Excalidraw API not initialized yet");
+            console.warn("Initialize: Excalidraw API not initialized yet");
             return;
         }
         //Setup saving to file
@@ -120,6 +112,26 @@ function App() {
     }, [excalidrawAPI]);
 
     useEffect(() => {
+        // let unlisten: (() => void) | undefined;
+        // const setup = async () => {
+        //     unlisten = await listen<void>('window-close-requested', async (event) => {
+        //         saveSVG();
+        //         console.info(
+        //             "WINDOW CLOSE REQUEST"
+        //         );
+        //         // await invoke<void>("close_app");
+        //     });
+        // };
+        // setup();
+
+        listen<void>('window-close-requested', async (event) => {
+            saveSVG();
+            console.info(
+                "WINDOW CLOSE REQUEST"
+            );
+            // await invoke<void>("close_app");
+        });
+
         document.getElementById("main-container")!.addEventListener("keydown", (e) => {
             if (e.ctrlKey) {
                 switch (e.key) {
