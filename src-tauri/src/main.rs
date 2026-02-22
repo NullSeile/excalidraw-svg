@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    excalidraw_svg_lib::run()
+    excalidraw_svg_editor_lib::run()
 }

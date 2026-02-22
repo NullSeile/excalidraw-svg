@@ -1,8 +1,8 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "excalidraw-svg",
+    "productName": "Excalidraw SVG Editor",
     "version": "0.1.0",
-    "identifier": "com.excalidraw-svg.app",
+    "identifier": "com.excalidraw-svg-editor.app",
     "build": {
         "beforeDevCommand": "yarn dev",
         "devUrl": "http://localhost:1420",
@@ -47,6 +47,17 @@
         }
     },
     "bundle": {
-        "active": false
+        "active": false,
+        "icon": [
+            "icons/excalidraw-svg-editor.png"
+        ],
+        "fileAssociations": [
+            {
+                "ext": [
+                    "excalidraw.svg"
+                ],
+                "mimeType": "image/svg+xml"
+            }
+        ]
     }
 }
